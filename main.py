@@ -9,8 +9,10 @@ class Game(Enum):
     WIN = 3
     LOSE = 4
 
-FULLSCREEN = (500, 400)
+FULLSCREEN = (1020, 720)
 CENTER = (FULLSCREEN[0] // 2, FULLSCREEN[1] // 2)
+
+background = pygame.image.load('background.png')
 
 
 def print_message(display, FONT_STYLE, message, color, background_color=(0,0,0), position=[CENTER[0] - 50, CENTER[1] - 50], size=None):
@@ -29,7 +31,8 @@ def main():
     game = 1 # Game loop control variable
     xpos = CENTER[0]; # Initial X position
     ypos = CENTER[1]; # Initial Y position
-    ms = 10; # Movement speed
+    snakeblock = 50; # Size of the snake
+    ms = 50; # Movement speed
     length = 1; # Length of the snake
     positions = [[xpos, ypos]] # List of positions of the snake
 
@@ -43,15 +46,18 @@ def main():
     while game == Game.RUNNING.value:
         if positions[0][0] < 0 or positions[0][0] > FULLSCREEN[0] or positions[0][1] < 0 or positions[0][1] > FULLSCREEN[1]:
             game = Game.LOSE.value
-        if positions[0][0] <= xpos_food + 10 and positions[0][0] >= xpos_food - 10 and positions[0][1] <= ypos_food + 10 and positions[0][1] >= ypos_food - 10:
+        for i in range(1, length):
+            if positions[0][0] == positions[i][0] and positions[0][1] == positions[i][1]:
+                game = Game.LOSE.value
+        if positions[0][0] <= xpos_food + snakeblock and positions[0][0] >= xpos_food - snakeblock and positions[0][1] <= ypos_food + snakeblock and positions[0][1] >= ypos_food - snakeblock:
             points += 1
             length += 1
             # Add a new position to the list
-            positions.append([positions[length - 2][0] + 10, positions[length - 2][1] + 10])
-            xpos_food = random.randint(0, FULLSCREEN[0])
-            ypos_food = random.randint(0, FULLSCREEN[1])
+            positions.append([-10, -10])
+            xpos_food = random.randint(100, FULLSCREEN[0] - 100)
+            ypos_food = random.randint(100, FULLSCREEN[1] - 100)
             if points == 10:
-                game = Game.WIN
+                game = Game.WIN.value
         for event in pygame.event.get():
             # Check for quit event
             if event.type==pygame.QUIT:
@@ -59,25 +65,36 @@ def main():
             # Check for key press
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
-                    for i in range(length):
-                        positions[i][0] -= ms
+                    for i in range(length - 1, 0, -1):
+                        positions[i][0] = positions[i - 1][0]
+                        positions[i][1] = positions[i - 1][1]
+                    positions[0][0] -= ms
                 elif event.key == pygame.K_RIGHT:
-                    for i in range(length):
-                        positions[i][0] += ms
+                    for i in range(length - 1, 0, -1):
+                        positions[i][0] = positions[i - 1][0]
+                        positions[i][1] = positions[i - 1][1]
+                    positions[0][0] += ms
                 elif event.key == pygame.K_UP:
-                    for i in range(length):
-                        positions[i][1] -= ms
+                    for i in range(length - 1, 0, -1):
+                        positions[i][0] = positions[i - 1][0]
+                        positions[i][1] = positions[i - 1][1]
+                    positions[0][1] -= ms
                 elif event.key == pygame.K_DOWN:
-                    for i in range(length):
-                        positions[i][1] += ms
+                    for i in range(length - 1, 0, -1):
+                        positions[i][0] = positions[i - 1][0]
+                        positions[i][1] = positions[i - 1][1]
+                    positions[0][1] += ms
         
         # Fill the screen with black color
-        display.fill((0,0,0))
+        display.fill((0,0,0))  
+        # Draw the background
+        display.blit(background, (0, 0))
         # Draw the snake
-        for position in positions:
-            pygame.draw.rect(display, (0, 255, 0), [position[0], position[1], 10, 10])
+        pygame.draw.rect(display, (0, 0, 255), [positions[0][0], positions[0][1], snakeblock, snakeblock])
+        for i in range(1, length):
+            pygame.draw.rect(display, (0, 127, 127), [positions[i][0], positions[i][1], snakeblock, snakeblock])
         # Draw the food
-        pygame.draw.rect(display, (255, 0, 0), [xpos_food, ypos_food, 10, 10])
+        pygame.draw.rect(display, (255, 0, 0), [xpos_food, ypos_food, snakeblock, snakeblock])
         # Draw the score
         print_message(display, FONT_STYLE, "Score: " + str(points), (255, 255, 255), position=[0, 0])
         # Update the display
@@ -85,12 +102,12 @@ def main():
 
     if game == Game.LOSE.value:
         print("You lose!")
-        print_message(display, FONT_STYLE, "You lose!", (255, 0, 0))
+        print_message(display, FONT_STYLE, "You lose!", (255, 0, 0), size=200)
         time.sleep(5)
 
     if game == Game.WIN.value:
         print("You win!")
-        print_message(display, FONT_STYLE, "You win!", (0, 255, 0))
+        print_message(display, FONT_STYLE, "You win!", (255, 0, 0), size=200)
         time.sleep(5)
 
     pygame.quit()
