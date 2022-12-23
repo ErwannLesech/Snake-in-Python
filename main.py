@@ -13,9 +13,9 @@ FULLSCREEN = (500, 400)
 CENTER = (FULLSCREEN[0] // 2, FULLSCREEN[1] // 2)
 
 
-def print_message(display, FONT_STYLE, message, color):
-    message_display = FONT_STYLE.render(message, True, color, (0, 0, 0))
-    display.blit(message_display, [CENTER[0] - 50, CENTER[1] - 50])
+def print_message(display, FONT_STYLE, message, color, background_color=(0,0,0), position=[CENTER[0] - 50, CENTER[1] - 50], size=None):
+    message_display = FONT_STYLE.render(message, True, color, background_color)
+    display.blit(message_display, position)
     pygame.display.update()
 
 
@@ -34,34 +34,28 @@ def main():
     positions = [[xpos, ypos]] # List of positions of the snake
 
     # Points to collect to win the game
-    points = 10
+    points = 0
     xpos_food = random.randint(0, FULLSCREEN[0])
     ypos_food = random.randint(0, FULLSCREEN[1])
 
     # Game loop
 
     while game == Game.RUNNING.value:
-        print(positions)
-        print(xpos_food, ypos_food)
-        if xpos < 0 or xpos > FULLSCREEN[0] or ypos < 0 or ypos > FULLSCREEN[1]:
-            game = Game.LOSE
-        print(xpos <= xpos_food + 10)
-        print(xpos >= xpos_food - 10)
-        print(ypos <= ypos_food + 10)
-        print(ypos >= ypos_food - 10)
-        if xpos <= xpos_food + 10 and xpos >= xpos_food - 10 and ypos <= ypos_food + 10 and ypos >= ypos_food - 10:
-            points -= 1
+        if positions[0][0] < 0 or positions[0][0] > FULLSCREEN[0] or positions[0][1] < 0 or positions[0][1] > FULLSCREEN[1]:
+            game = Game.LOSE.value
+        if positions[0][0] <= xpos_food + 10 and positions[0][0] >= xpos_food - 10 and positions[0][1] <= ypos_food + 10 and positions[0][1] >= ypos_food - 10:
+            points += 1
             length += 1
-            positions.pop(0)
-            positions.append([xpos, ypos])
+            # Add a new position to the list
+            positions.append([positions[length - 2][0] + 10, positions[length - 2][1] + 10])
             xpos_food = random.randint(0, FULLSCREEN[0])
             ypos_food = random.randint(0, FULLSCREEN[1])
-            if points == 0:
+            if points == 10:
                 game = Game.WIN
         for event in pygame.event.get():
             # Check for quit event
             if event.type==pygame.QUIT:
-                game = Game.Quit
+                game = Game.QUIT.value
             # Check for key press
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
@@ -84,15 +78,17 @@ def main():
             pygame.draw.rect(display, (0, 255, 0), [position[0], position[1], 10, 10])
         # Draw the food
         pygame.draw.rect(display, (255, 0, 0), [xpos_food, ypos_food, 10, 10])
+        # Draw the score
+        print_message(display, FONT_STYLE, "Score: " + str(points), (255, 255, 255), position=[0, 0])
         # Update the display
         pygame.display.update()
 
-    if game == Game.LOSE:
+    if game == Game.LOSE.value:
         print("You lose!")
         print_message(display, FONT_STYLE, "You lose!", (255, 0, 0))
         time.sleep(5)
 
-    if game == Game.WIN:
+    if game == Game.WIN.value:
         print("You win!")
         print_message(display, FONT_STYLE, "You win!", (0, 255, 0))
         time.sleep(5)
