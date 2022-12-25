@@ -9,7 +9,7 @@ class Game(Enum):
     WIN = 3
     LOSE = 4
 
-FULLSCREEN = (1020, 720)
+FULLSCREEN = (1000, 700)
 CENTER = (FULLSCREEN[0] // 2, FULLSCREEN[1] // 2)
 
 background = pygame.image.load('background.png')
@@ -28,6 +28,8 @@ def main():
     display = pygame.display.set_mode(FULLSCREEN)
     pygame.display.set_caption('Snake game by Edureka')
 
+    clock = time.perf_counter()  # Start the clock
+
     game = 1 # Game loop control variable
     xpos = CENTER[0]; # Initial X position
     ypos = CENTER[1]; # Initial Y position
@@ -38,12 +40,15 @@ def main():
 
     # Points to collect to win the game
     points = 0
-    xpos_food = random.randint(0, FULLSCREEN[0])
-    ypos_food = random.randint(0, FULLSCREEN[1])
+    xpos_food = random.randint(100, FULLSCREEN[0] - 100)
+    ypos_food = random.randint(100, FULLSCREEN[1] - 100)
 
     # Game loop
 
     while game == Game.RUNNING.value:
+        #update the clock
+        clock = time.process_time()
+        # Check if the snake is out of the screen
         if positions[0][0] < 0 or positions[0][0] > FULLSCREEN[0] or positions[0][1] < 0 or positions[0][1] > FULLSCREEN[1]:
             game = Game.LOSE.value
         for i in range(1, length):
@@ -53,7 +58,7 @@ def main():
             points += 1
             length += 1
             # Add a new position to the list
-            positions.append([-10, -10])
+            positions.append([-100, -100])
             xpos_food = random.randint(100, FULLSCREEN[0] - 100)
             ypos_food = random.randint(100, FULLSCREEN[1] - 100)
             if points == 10:
@@ -96,18 +101,20 @@ def main():
         # Draw the food
         pygame.draw.rect(display, (255, 0, 0), [xpos_food, ypos_food, snakeblock, snakeblock])
         # Draw the score
-        print_message(display, FONT_STYLE, "Score: " + str(points), (255, 255, 255), position=[0, 0])
+        print_message(display, FONT_STYLE, "Score: " + str(points), (255, 255, 255), background_color=(181,230,29),position=[0, 0])
+        # Draw the clock
+        print_message(display, FONT_STYLE, "Time: " + str(int(clock)), (255, 255, 255), background_color=(181,230,29), position=[0, 50])
         # Update the display
         pygame.display.update()
 
     if game == Game.LOSE.value:
         print("You lose!")
-        print_message(display, FONT_STYLE, "You lose!", (255, 0, 0), size=200)
+        print_message(display, FONT_STYLE, "You lose!", (255, 0, 0), background_color=(181,230,29), size=200)
         time.sleep(5)
 
     if game == Game.WIN.value:
         print("You win!")
-        print_message(display, FONT_STYLE, "You win!", (255, 0, 0), size=200)
+        print_message(display, FONT_STYLE, "You win!", (255, 0, 0), background_color=(181,230,29), size=200)
         time.sleep(5)
 
     pygame.quit()
